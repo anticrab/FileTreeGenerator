@@ -1,14 +1,16 @@
 #include <filesystem>
-#include <iostream>
-#include <string>
 #include <fstream>
+#include <iostream>
 #include <nlohmann/json.hpp>
+#include <string>
+#include <unordered_map>
 
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
-bool copyFile(const std::string& SRC, const std::string& DEST)
-{
+
+// функция копирования файла SRC в файл DEST в бинарном режиме
+bool copyFile(const std::string& SRC, const std::string& DEST) {
   std::ifstream src(SRC, std::ios::binary);
   std::ofstream dest(DEST, std::ios::binary);
   dest << src.rdbuf();
@@ -16,25 +18,44 @@ bool copyFile(const std::string& SRC, const std::string& DEST)
 }
 
 int main() {
-  std::map<int, char> months{{1, 'F'}, {2, 'G'},{3, 'H'},{4, 'J'},{5, 'K'},{6, 'M'},{7, 'N'},{8, 'Q'},{9, 'U'},{10, 'V'},{11, 'X'},{12, 'Z'}};
-  std::ifstream json_file("..\\config.json");
+  std::unordered_map<int, char>
+      months{{1, 'F'},  {2, 'G'}, {3, 'H'}, {4, 'J'}, {5, 'K'},
+             {6, 'M'},  {7, 'N'}, {8, 'Q'}, {9, 'U'}, {10, 'V'},
+             {11, 'X'}, {12, 'Z'}};  // словарь букв, принадлежащие месяцам
+
+  std::ifstream json_file("..\\config.json");  // считываем config.json
   json json_data = json::parse(json_file);
 
   std::string path;
   std::cout << "Enter path:";
   std::cin >> path;
-  for (const auto &date : fs::directory_iterator(path)) {
+
+  // проходимся по папкам в 'NAME'
+  for (const auto& date : fs::directory_iterator(path)) {
+    // получаем название каталога
     std::string datename = date.path().filename().string();
-    char month = months[(std::stoi(datename.substr(3,2)) + 1)%12];
-    for (const auto &name : fs::directory_iterator(date.path())) {
-      std::string filename = name.path().filename().string();
-      for (auto& [conf_name,conf_value] : json_data.items()) { // ищем ключ, под который подходит название файла
+
+    // получаем букву следующего месяца
+    char month = months[(std::stoi(datename.substr(3, 2)) + 1) % 12];
+
+    // проходимся по файлам в папке 'date'
+    for (const auto& files : fs::directory_iterator(date.path())) {
+      std::string filename = files.path().filename().string();
+
+      // ищем ключ, под который подходит название файла
+      for (auto& [conf_name, conf_value] : json_data.items()) {
         if (filename.size() - conf_name.size() >= 2) {
-          if (filename.substr(0, conf_name.size()) == conf_name && filename[conf_name.size() + 1] == month) {
-            copyFile(name.path().string(), date.path().string() + "\\" + conf_name + '!');
+          // условие копирования файла
+          if (filename.substr(0, conf_name.size()) == conf_name &&
+              filename[conf_name.size() + 1] == month) {
+            if (!copyFile(files.path().string(),
+                     date.path().string() + "\\" + conf_name + '!')) {
+              std::cerr << "Error copying the file: " + filename << std::endl;
+            }
           }
         }
       }
     }
   }
+  return 0;
 }
