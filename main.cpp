@@ -16,11 +16,16 @@ bool copyFile(const std::string& SRC, const std::string& DEST) {
   return src && dest;
 }
 
+// функция проверки корректности даты формата dd-mm-yyyy
 bool isDate(const std::string& name) {
   if (name.size() != 10) return false;
   if (name[2] != '-' || name[5] != '-') return false;
-  if (!isdigit(name[0]) || !isdigit(name[1]) || !isdigit(name[3]) || !isdigit(name[4]) || !isdigit(name[6]) || !isdigit(name[7]) || !isdigit(name[8]) || !isdigit(name[9])) return false;
-  if (!(name[0] == '0' || name[0] == '1' || name[0] == '2' || name[0] == '3')) return false;
+  if (!isdigit(name[0]) || !isdigit(name[1]) || !isdigit(name[3]) ||
+      !isdigit(name[4]) || !isdigit(name[6]) || !isdigit(name[7]) ||
+      !isdigit(name[8]) || !isdigit(name[9]))
+    return false;
+  if (!(name[0] == '0' || name[0] == '1' || name[0] == '2' || name[0] == '3'))
+    return false;
   if (!(name[3] == '0' || name[3] == '1')) return false;
   return true;
 }
@@ -29,7 +34,7 @@ int main() {
   std::unordered_map<int, char>
       months{{1, 'F'},  {2, 'G'}, {3, 'H'}, {4, 'J'}, {5, 'K'},
              {6, 'M'},  {7, 'N'}, {8, 'Q'}, {9, 'U'}, {10, 'V'},
-             {11, 'X'}, {12, 'Z'}};  // словарь букв, принадлежащие месяцам
+             {11, 'X'}, {0, 'Z'}};  // словарь букв, принадлежащие месяцам
 
   std::ifstream json_file("..\\config.json");  // считываем config.json
   json json_data = json::parse(json_file);
