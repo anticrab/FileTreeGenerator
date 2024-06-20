@@ -1,3 +1,4 @@
 .idea
 test_task
 cmake-build-debug
+cmake-build-release

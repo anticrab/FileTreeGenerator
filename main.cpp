@@ -8,7 +8,6 @@
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
-
 // функция копирования файла SRC в файл DEST в бинарном режиме
 bool copyFile(const std::string& SRC, const std::string& DEST) {
   std::ifstream src(SRC, std::ios::binary);
@@ -34,9 +33,12 @@ int main() {
   for (const auto& date : fs::directory_iterator(path)) {
     // получаем название каталога
     std::string datename = date.path().filename().string();
+    if (datename.size() != 10) continue;
+    if (datename[2] != '-' || datename[5] != '-') continue;
 
     // получаем букву следующего месяца
-    char month = months[(std::stoi(datename.substr(3, 2)) + 1) % 12];
+    char month =
+        months[((datename[3] - '0') * 10 + datename[4] - '0' + 1) % 12];
 
     // проходимся по файлам в папке 'date'
     for (const auto& files : fs::directory_iterator(date.path())) {
@@ -49,7 +51,7 @@ int main() {
           if (filename.substr(0, conf_name.size()) == conf_name &&
               filename[conf_name.size() + 1] == month) {
             if (!copyFile(files.path().string(),
-                     date.path().string() + "\\" + conf_name + '!')) {
+                          date.path().string() + "\\" + conf_name + '!')) {
               std::cerr << "Error copying the file: " + filename << std::endl;
             }
           }
