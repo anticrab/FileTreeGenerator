@@ -16,6 +16,15 @@ bool copyFile(const std::string& SRC, const std::string& DEST) {
   return src && dest;
 }
 
+bool isDate(const std::string& name) {
+  if (name.size() != 10) return false;
+  if (name[2] != '-' || name[5] != '-') return false;
+  if (!isdigit(name[0]) || !isdigit(name[1]) || !isdigit(name[3]) || !isdigit(name[4]) || !isdigit(name[6]) || !isdigit(name[7]) || !isdigit(name[8]) || !isdigit(name[9])) return false;
+  if (!(name[0] == '0' || name[0] == '1' || name[0] == '2' || name[0] == '3')) return false;
+  if (!(name[3] == '0' || name[3] == '1')) return false;
+  return true;
+}
+
 int main() {
   std::unordered_map<int, char>
       months{{1, 'F'},  {2, 'G'}, {3, 'H'}, {4, 'J'}, {5, 'K'},
@@ -33,8 +42,7 @@ int main() {
   for (const auto& date : fs::directory_iterator(path)) {
     // получаем название каталога
     std::string datename = date.path().filename().string();
-    if (datename.size() != 10) continue;
-    if (datename[2] != '-' || datename[5] != '-') continue;
+    if (!isDate(datename)) continue;
 
     // получаем букву следующего месяца
     char month =
